@@ -1,1 +1,53 @@
+{
+  "app": "EngineAPI",
+  "type": "run",
+  "action": "series_skip_errors",
+  "id": "series_371874310",
+  "title": "Daily Webhook Analysis and Email Notification",
+  "zdl_version": "0.4",
+  "steps": [
+    {
+      "id": "371874310",
+      "app": "ScheduleCLIAPI@1.6.0",
+      "type": "read",
+      "action": "everyDay",
+      "params": {"weekends": "yes", "hod": "8:00 AM"}
+    },
+    {
+      "id": "371874312",
+      "app": "WebHookCLIAPI@1.1.1",
+      "type": "write",
+      "action": "get",
+      "params": {"as_json": false, "json_key": "json", "unflatten": false, "url": "https://hnrss.org/newest?topic=ai"}
+    },
+    {
+      "id": "371875415",
+      "app": "WebHookCLIAPI@1.1.1",
+      "type": "write",
+      "action": "get",
+      "params": {"as_json": false, "json_key": "json", "unflatten": true, "url": "https://news.ycombinator.com/rss"}
+    },
+    {
+      "id": "371875529",
+      "app": "ZapierFormatterCLIAPI@1.0.8",
+      "type": "write",
+      "action": "util_line_item",
+      "params": {"transform": "util.line_itemizer", "subtotal_toggle": false, "decimals": "2", "inputs": "news", "my_dict": {"content": "{{=Object.to_json(output['371874312'])}}{{=Object.to_json(output['371874312'])}}"}}
+    },
+    {
+      "id": "371876203",
+      "app": "AICLIAPI@4.0.9",
+      "type": "write",
+      "action": "get_completion",
+      "params": {"authentication_id": "0", "model_id": "openai/gpt-4.1", "provider_id": "openai", "isOutputArray": false, "tools": [{"type": "builtin", "id": "tool-713c558b-a394-4572-b601-59a2c0ec0193", "builtin_tool_name": "browse_web"}], "instructions": "{{=Object.to_json(output['371875529'])}}\nYou are a professional news editor creating a concise daily news digest for users. Input news data: {{4.Raw Output}} Task: 1. Read the provided JSON/RSS news data. 2. Extract the most important news stories from the last 24 hours. 3. Select the top 5–8 stories based on relevance and importance. 4. Write a short summary for each story in 2–3 sentences. 5. Use clear, simple, and engaging language. 6. Do not include duplicate stories. 7. If the data is incomplete, summarize only the available stories. Format the output as: 📰 Daily News Digest – {{zap_meta_human_now}} 1. Headline Summary: 2–3 sentence summary. Source: Source name if available. 2. Headline Summary: 2–3 sentence summary. Source: Source name if available. After the list, add: \"Stay informed with tomorrow's daily news digest.\" Return only the formatted digest, with no extra explanation.", "outputSchema": {"Daily News Digest": "The formatted daily news digest with top 5-8 AI and tech stories and summaries"}}
+    },
+    {
+      "id": "371877635",
+      "app": "ZapierMailCLIAPI@2.0.7",
+      "type": "write",
+      "action": "outbound",
+      "params": {"subject": "daily dose of information", "to": "reddygirl1535@gmail.com", "body": "{{=Object.to_json(output['371876203'])}}"}
+    }
+  ]
+}
 
