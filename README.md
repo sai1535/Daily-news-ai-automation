@@ -56,3 +56,4 @@ Generate Digest with AI (GPT-4.1)
 
 ↓
 Send Email
+project link https://zapier.com/app/zap/371874310
