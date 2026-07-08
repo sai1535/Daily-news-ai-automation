@@ -1,1 +1,15 @@
+# Zapier config
+.env
+*.key
+credentials.json
+auth_tokens.json
 
+# System
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
